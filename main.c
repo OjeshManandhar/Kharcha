@@ -741,7 +741,7 @@ void display_full_record(struct record_details record)
     gotoxy(top.row, bot.col - 20);
     if (record.type == 'S')
         printf("Type: Spent");
-    else
+    else if (record.type == 'E')
         printf("Type: Earned");
     top.row++;
 
@@ -1756,7 +1756,7 @@ int diplay_a_record(const struct record_details data)
         gotoxy(top.row, top.col);
         if (data.type == 'S')
             printf("%-11s: Spent", "Type");
-        else
+        else if (data.type == 'E')
             printf("%-11s: Earned", "Type");
         top.row++;
 
@@ -1888,7 +1888,7 @@ void edit_record_window(struct record_details *record)
         {
             if (dummy.type == 'S')
                 printf("%s", "Spent");
-            else
+            else if (dummy.type == 'E')
                 printf("%s", "Earned");
         }
         top.row++;
@@ -1939,7 +1939,7 @@ void edit_record_window(struct record_details *record)
                 gotoxy(top.row + 2, top.col + 1);
                 if (dummy.type == 'S')
                     printf("\bSpent");          //printf("pent");
-                else
+                else if (dummy.type == 'E')
                     printf("\bEarned");         //printf("arned");
 
                 if (dummy.type != 'S' && dummy.type != 'E')
@@ -1993,7 +1993,7 @@ void edit_record_window(struct record_details *record)
         printf("%-11s: ", "Type");
         if (dummy.type == 'S')
             printf("%s", "Spent");
-        else
+        else if (dummy.type == 'E')
             printf("%s", "Earned");
         top.row++;
 
@@ -2114,7 +2114,7 @@ void edit_record_window(struct record_details *record)
     printf("%-11s: ", "Type");
     if (dummy.type == 'S')
         printf("%s", "Spent");
-    else
+    else if (dummy.type == 'E')
         printf("%s", "Earned");
     top.row++;
 
@@ -2775,7 +2775,7 @@ void add_record()
         {
             if (record.type == 'S')
                 printf("Spent");
-            else
+            else if (record.type == 'E')
                 printf("Earned");
         }
         else
@@ -2788,7 +2788,7 @@ void add_record()
                 gotoxy(top.row, top.col + 1);
                 if (record.type == 'S')
                     printf("\bSpent");      //printf("pent");
-                else
+                else if (record.type == 'E')
                     printf("\bEarned");     //printf("arned");
 
                 if (record.type != 'S' && record.type != 'E')
