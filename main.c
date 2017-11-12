@@ -92,9 +92,9 @@ void get_edit_display_description(char *, short int);
 
 //Window functions
 int display_menu(char **, const int, int);
-void display_tag_window(char *, char *, const short int);
+void display_tag_id_window(char *, char *, const short int);
 void display_tags_list(char **, const unsigned int);
-int display_record_window(const short int);
+int display_record_id_window(const short int);
 int diplay_a_record(const struct record_details);
 void edit_record_window(struct record_details *);
 int display_records_list(const long int *,const unsigned int);
@@ -1353,7 +1353,7 @@ int display_menu(char **menu_items, const int n, int choice)
     }
 }
 
-void display_tag_window(char *data_1, char *data_2, const short int type)
+void display_tag_id_window(char *data_1, char *data_2, const short int type)
 {
     /*
     0 = add
@@ -1670,7 +1670,7 @@ void display_tags_list(char **tags_list, const unsigned int total_tags)
     }
 }
 
-int display_record_window(const short int type)
+int display_record_id_window(const short int type)
 {
     /*
     type
@@ -1802,7 +1802,7 @@ int diplay_a_record(const struct record_details data)
     }
 }
 
-void edit_record_id_window(struct record_details *record)
+void edit_record_window(struct record_details *record)
 {
     enum turn_detail
     {
@@ -2750,7 +2750,7 @@ void add_record()
         }
         top.row++;
 
-        gotoxy(top.row, top.col + 3);
+        gotoxy(top.row, top.col + 4);
         if (flag_amount == 1)
             printf("%.2f", record.amount);
         else
@@ -3749,7 +3749,7 @@ void edit_record()
     }
     fseek(fp, 0, SEEK_SET);
 
-    dummy_id = display_record_window(1);
+    dummy_id = display_record_id_window(1);
 
     if (dummy_id > record.record_id)
     {
@@ -3790,7 +3790,7 @@ void edit_record()
 
                 if (choice == 1)
                 {
-                    edit_record_id_window(&record);
+                    edit_record_window(&record);
 
                     print_detail("RECORD EDITED");
                 }
@@ -3848,7 +3848,7 @@ void delete_record()
     }
     fseek(fp, 0, SEEK_SET);
 
-    dummy_id = display_record_window(2);
+    dummy_id = display_record_id_window(2);
 
     if (dummy_id > record.record_id)
     {
@@ -3991,7 +3991,7 @@ void add_tag()
         }
     }
 
-    display_tag_window(tag, NULL, 0);
+    display_tag_id_window(tag, NULL, 0);
 
     if (strcmpi(tag, "Others") == 0)
     {
@@ -4134,7 +4134,7 @@ void search_tags()
         return;
     }
 
-    display_tag_window(tag, NULL, 1);
+    display_tag_id_window(tag, NULL, 1);
 
     while (fread(dummy, sizeof(dummy), 1, fp) == 1)
     {
@@ -4173,7 +4173,7 @@ void edit_tag()
         return;
     }
 
-    display_tag_window(old_tag, new_tag, 2);
+    display_tag_id_window(old_tag, new_tag, 2);
 
     if (strcmpi(old_tag, "Others") == 0)
     {
@@ -4244,7 +4244,7 @@ void delete_tag()
         return;
     }
 
-    display_tag_window(tag, NULL, 3);
+    display_tag_id_window(tag, NULL, 3);
 
     if (strcmpi(tag, "Others") == 0)
     {
