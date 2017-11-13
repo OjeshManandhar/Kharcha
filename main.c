@@ -913,7 +913,7 @@ int date_compare_ascending(const void *elem1, const void *elem2)
 
     ans = strcmp(record_a.date, record_b.date);
     if (ans == 0)
-        ans = record_b.record_id - record_a.record_id;
+        ans = record_a.record_id - record_b.record_id;
 
     for (i = 0; i < record_a.no_of_tags; i++)
         free(record_a.tags_list[i]);
@@ -971,7 +971,7 @@ int amount_compare_ascending(const void *elem1, const void *elem2)
 
     ans = record_a.amount - record_b.amount;
     if (ans == 0)
-        ans = record_b.record_id - record_a.record_id;
+        ans = record_a.record_id - record_b.record_id;
 
     for (i = 0; i < record_a.no_of_tags; i++)
         free(record_a.tags_list[i]);
