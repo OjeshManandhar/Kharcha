@@ -3227,6 +3227,10 @@ void filter_records()
                     start_id = string_to_int(temp_id);
                 }while (end_id == 0);
                 break;
+            case 5:
+                for (i = 0; i < 6; i++)
+                    strcpy(set_detail_menu[i], "");
+                break;
             }
             break;
         case 2:
@@ -3312,6 +3316,10 @@ void filter_records()
                 gotoxy(top.row, top.col);
                 printf("Till: ");
                 get_edit_date(end_date);
+                break;
+            case 5:
+                for (i = 0; i < 6; i++)
+                    strcpy(set_detail_menu[i], "");
                 break;
             }
             break;
@@ -3443,6 +3451,10 @@ void filter_records()
                     scanf("%f", &end_amount);
                 }while(end_amount < 0);
                 break;
+            case 5:
+                for (i = 0; i < 6; i++)
+                    strcpy(set_detail_menu[i], "");
+                break;
             }
             break;
         case 4:
@@ -3451,7 +3463,6 @@ void filter_records()
             strcpy(set_detail_menu[2], "Expenses");
             strcpy(set_detail_menu[3], "Earnings");
             strcpy(set_detail_menu[4], "Back");
-            strcpy(set_detail_menu[5], "");
 
             detail_menu_choice = display_menu(set_detail_menu, 5, 1);
 
@@ -3466,6 +3477,10 @@ void filter_records()
             case 3:
                 type_type = earned;
                 break;
+            case 4:
+                for (i = 0; i < 5; i++)
+                    strcpy(set_detail_menu[i], "");
+                break;
             }
             break;
         case 5:
@@ -3474,7 +3489,6 @@ void filter_records()
             strcpy(set_detail_menu[2], "Any among ...");
             strcpy(set_detail_menu[3], "All of ...");
             strcpy(set_detail_menu[4], "Back");
-            strcpy(set_detail_menu[5], "");
 
             detail_menu_choice = display_menu(set_detail_menu, 5, 1);
 
@@ -3488,6 +3502,10 @@ void filter_records()
                 break;
             case 3:
                 tags_type = all_of;
+                break;
+            case 4:
+                for (i = 0; i < 5; i++)
+                    strcpy(set_detail_menu[i], "");
                 break;
             }
 
@@ -3575,8 +3593,6 @@ void filter_records()
             strcpy(set_detail_menu[1], "Any");
             strcpy(set_detail_menu[2], "Enter keyword");
             strcpy(set_detail_menu[3], "Back");
-            strcpy(set_detail_menu[4], "");
-            strcpy(set_detail_menu[5], "");
 
             detail_menu_choice = display_menu(set_detail_menu, 4, 1);
 
@@ -3604,6 +3620,10 @@ void filter_records()
                 top.col += 9;
                 get_edit_display_description(description, 2);
                 break;
+            case 3:
+                for (i = 0; i < 4; i++)
+                    strcpy(set_detail_menu[i], "");
+                break;
             }
             break;
         case 7:
@@ -3614,7 +3634,7 @@ void filter_records()
                 free(filter_menu_detial[i]);
             free(filter_menu_detial);
 
-            for (i = 0; i < 9; i++)
+            for (i = 0; i < 6; i++)
                 free(set_detail_menu[i]);
             free(set_detail_menu);
 
