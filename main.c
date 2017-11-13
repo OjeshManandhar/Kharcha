@@ -3335,9 +3335,9 @@ void filter_records()
                 do
                 {
                     top.row = (25 - 4)/2;
-                    top.col = (80 - 20)/2;
+                    top.col = (80 - 24)/2;
                     bot.row = top.row + 4 - 1;
-                    bot.col = top.col + 20 - 1;
+                    bot.col = top.col + 24 - 1;
 
                     system("cls");
                     print_box(2, 0, 0, 0);
@@ -3353,7 +3353,7 @@ void filter_records()
                     printf("%-4s: Rs.", "To");
 
                     top.row--;
-                    top.col += 5;
+                    top.col += 6;
 
                     start_amount = -1;
                     do
@@ -3385,9 +3385,9 @@ void filter_records()
                 amount_type = more_than;
 
                 top.row = (25 - 3)/2;
-                top.col = (80 - 21)/2;
+                top.col = (80 - 25)/2;
                 bot.row = top.row + 3 - 1;
-                bot.col = top.col + 21 - 1;
+                bot.col = top.col + 25 - 1;
 
                 system("cls");
                 print_box(2, 0, 0, 0);
@@ -3398,7 +3398,7 @@ void filter_records()
                 gotoxy(top.row, top.col);
                 printf("Above: Rs. ");
 
-                top.col += 6;
+                top.col += 7;
 
                 start_amount = -1;
                 do
@@ -3416,9 +3416,9 @@ void filter_records()
                 amount_type = less_than;
 
                 top.row = (25 - 3)/2;
-                top.col = (80 - 21)/2;
+                top.col = (80 - 25)/2;
                 bot.row = top.row + 3 - 1;
-                bot.col = top.col + 21 - 1;
+                bot.col = top.col + 25 - 1;
 
                 system("cls");
                 print_box(2, 0, 0, 0);
@@ -3429,7 +3429,7 @@ void filter_records()
                 gotoxy(top.row, top.col);
                 printf("Below: Rs. ");
 
-                top.col += 6;
+                top.col += 7;
 
                 end_amount = -1;
                 do
