@@ -3076,7 +3076,7 @@ void filter_records()
     }id_type = any, date_type = any, amount_type = any, type_type = any, tags_type = any, description_type = any;
 
     FILE *fp, *f_tags;
-    short int i, length;
+    short int i;
     int filter_menu_choice, detail_menu_choice;
     char temp_id[11] = "";
     char **filter_menu_detial = NULL;
@@ -3228,10 +3228,11 @@ void filter_records()
                 }while (end_id == 0);
                 break;
             case 5:
-                for (i = 0; i < 6; i++)
-                    strcpy(set_detail_menu[i], "");
+                //don't change anything
                 break;
             }
+            for (i = 0; i < 6; i++)
+                strcpy(set_detail_menu[i], "");
             break;
         case 2:
             strcpy(set_detail_menu[0], "Set Detail, Date");
@@ -3318,10 +3319,10 @@ void filter_records()
                 get_edit_date(end_date);
                 break;
             case 5:
-                for (i = 0; i < 6; i++)
-                    strcpy(set_detail_menu[i], "");
                 break;
             }
+            for (i = 0; i < 6; i++)
+                strcpy(set_detail_menu[i], "");
             break;
         case 3:
             strcpy(set_detail_menu[0], "Set Detail, Amount");
@@ -3452,10 +3453,10 @@ void filter_records()
                 }while(end_amount < 0);
                 break;
             case 5:
-                for (i = 0; i < 6; i++)
-                    strcpy(set_detail_menu[i], "");
                 break;
             }
+            for (i = 0; i < 6; i++)
+                strcpy(set_detail_menu[i], "");
             break;
         case 4:
             strcpy(set_detail_menu[0], "Set Detail, Type");
@@ -3478,10 +3479,10 @@ void filter_records()
                 type_type = earned;
                 break;
             case 4:
-                for (i = 0; i < 5; i++)
-                    strcpy(set_detail_menu[i], "");
                 break;
             }
+            for (i = 0; i < 6; i++)
+                strcpy(set_detail_menu[i], "");
             break;
         case 5:
             strcpy(set_detail_menu[0], "Set Detail, Tags");
@@ -3504,10 +3505,10 @@ void filter_records()
                 tags_type = all_of;
                 break;
             case 4:
-                for (i = 0; i < 5; i++)
-                    strcpy(set_detail_menu[i], "");
                 break;
             }
+            for (i = 0; i < 6; i++)
+                strcpy(set_detail_menu[i], "");
 
             if ((detail_menu_choice == 2) || (detail_menu_choice == 3))
             {
@@ -3621,10 +3622,10 @@ void filter_records()
                 get_edit_display_description(description, 2);
                 break;
             case 3:
-                for (i = 0; i < 4; i++)
-                    strcpy(set_detail_menu[i], "");
                 break;
             }
+            for (i = 0; i < 6; i++)
+                strcpy(set_detail_menu[i], "");
             break;
         case 7:
             //FILTER
