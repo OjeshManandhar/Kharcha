@@ -3513,7 +3513,7 @@ void filter_records()
             if ((detail_menu_choice == 2) || (detail_menu_choice == 3))
             {
                 no_of_tags = 0;
-                for (i = 0; i , no_of_tags; i++)
+                for (i = 0; i < no_of_tags; i++)
                     strcpy(tags_list[i], "");
 
                 do
@@ -3628,7 +3628,73 @@ void filter_records()
                 strcpy(set_detail_menu[i], "");
             break;
         case 7:
-            //FILTER
+            system("cls");
+
+            printf("ID type: ");
+            if (id_type == any)
+                puts("Any");
+            else if (id_type == range)
+                printf("%u to %u\n", start_id, end_id);
+            else if (id_type == more_than)
+                printf("from %u\n", start_id);
+            else if (id_type == less_than)
+                printf("to %u\n", end_id);
+            else
+                puts("Error");
+
+            printf("\nDate type: ");
+            if (date_type == any)
+                puts("Any");
+            else if (date_type == range)
+                printf("%s to %s\n", start_date, end_date);
+            else if (date_type == more_than)
+                printf("since %s\n", start_date);
+            else if (date_type == less_than)
+                printf("till %s\n", end_date);
+            else
+                puts("Error");
+
+            printf("\nAmount type: ");
+            if (amount_type == any)
+                puts("Any");
+            else if (amount_type == range)
+                printf("Rs.%.2f to Rs.%.2f\n", start_amount, end_amount);
+            else if (amount_type == more_than)
+                printf("above Rs.%.2f\n", start_amount);
+            else if (amount_type == less_than)
+                printf("below Rs.%.2f\n", end_amount);
+            else
+                puts("Error");
+
+            printf("\nType type: ");;
+            if (type_type == any)
+                puts("Any");
+            else if (type_type == spent)
+                printf("%c\n", 'S');
+            else if (type_type == earned)
+                printf("%c\n", 'E');
+            else
+                puts("Error");
+
+            printf("\nTags type: ");
+            if (tags_type == any)
+                puts("Any");
+            else if (tags_type == any_among)
+                puts("Any");
+            else if (tags_type == all_of)
+                puts("All");
+            else
+                puts("Error");
+
+            printf("\nDescription type: ");
+            if (description_type == any)
+                puts("Any");
+            else if (description_type == keyword)
+                puts("Keyword");
+            else
+                puts("Error");
+
+            (void)getkey();
             break;
         case 8:
             for (i = 0; i < 9; i++)
