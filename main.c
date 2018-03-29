@@ -3224,7 +3224,7 @@ void filter_records()
                     top.col += 4;
 
                     get_data(temp_id, 5);
-                    start_id = string_to_int(temp_id);
+                    end_id = string_to_int(temp_id);
                 }while (end_id == 0);
                 break;
             case 5:
