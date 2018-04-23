@@ -1432,6 +1432,7 @@ void display_tags_list(char **tags_list, const unsigned int total_tags)
     page = 1;
     count = 0;
     option = 1;
+    choice = 0;
 
     while (1)
     {
