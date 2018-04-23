@@ -3109,8 +3109,15 @@ void filter_records()
     }
 
     if (fread(&record.record_id, sizeof(unsigned int), 1, fp) != 1)
+    {
         print_detail("NO RECORDS FOUND");
+
+        fclose(fp);
+        fclose(f_tags);
+        return;
+    }
     fseek(fp, 0, SEEK_SET);
+    fclose(fp);
 
     filter_menu_detial = get_2D_char_array(9, 15);
     strcpy(filter_menu_detial[0], "FILTER RECORDS");
@@ -3706,7 +3713,6 @@ void filter_records()
                 free(set_detail_menu[i]);
             free(set_detail_menu);
 
-            fclose(fp);
             fclose(f_tags);
             break;
         }
