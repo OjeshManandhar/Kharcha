@@ -3071,11 +3071,6 @@ void list_records()
 
 void filter_records()
 {
-    enum filter_type_detail
-    {
-        any, range, more_than, less_than, spent, earned, any_among, all_of, keyword
-    }id_type = any, date_type = any, amount_type = any, type_type = any, tags_type = any, description_type = any;
-
     FILE *fp, *f_tags;
     short int i;
     int filter_menu_choice, detail_menu_choice;
@@ -3085,13 +3080,10 @@ void filter_records()
     struct record_details record = {0};
 
     uint8_t flag_tag;
-    unsigned int start_id = 0, end_id = 0;
-    char start_date[DATE_SIZE] = "", end_date[DATE_SIZE] = "";
-    float start_amount = 0, end_amount = 0;
-    short int no_of_tags = 0;
     char temp_tag[PASSWORD_TAG_SIZE] = "", dummy[PASSWORD_TAG_SIZE] = "";
-    char tags_list[5][PASSWORD_TAG_SIZE] = {""};
-    char description[151] = "";
+    char temp_description[151] = "";
+
+    struct record_details start = {0}, end = {0};
 
     fp = fopen("records.dat", "rb");
     if (fp == NULL)
@@ -3151,11 +3143,10 @@ void filter_records()
 
             switch(detail_menu_choice)
             {
-            case 1:
-                id_type = any;
+            case 1:     //Any
+                start.record_id = end.record_id = 0;
                 break;
-            case 2:
-                id_type = range;
+            case 2:     //Range
                 do
                 {
                     top.row = (25 - 4)/2;
@@ -3180,16 +3171,16 @@ void filter_records()
 
                     gotoxy(top.row, top.col);
                     get_data(temp_id, 5);
-                    start_id = string_to_int(temp_id);
+                    start.record_id = string_to_int(temp_id);
                     top.row++;
 
                     gotoxy(top.row, top.col);
                     get_data(temp_id, 5);
-                    end_id = string_to_int(temp_id);
-                }while ((start_id == 0) || (end_id == 0) || (start_id > end_id));
+                    end.record_id = string_to_int(temp_id);
+                }while ((start.record_id == 0) || (end.record_id == 0) || (start.record_id > end.record_id));
                 break;
-            case 3:
-                id_type = more_than;
+            case 3:     //More than
+                end.record_id = 0;
                 do
                 {
                     top.row = (25 - 3)/2;
@@ -3209,11 +3200,11 @@ void filter_records()
 
                     gotoxy(top.row, top.col);
                     get_data(temp_id, 5);
-                    start_id = string_to_int(temp_id);
-                }while (start_id == 0);
+                    start.record_id = string_to_int(temp_id);
+                }while (start.record_id == 0);
                 break;
-            case 4:
-                id_type = less_than;
+            case 4:     //Less than
+                start.record_id = 0;
                 do
                 {
                     top.row = (25 - 3)/2;
@@ -3232,8 +3223,8 @@ void filter_records()
                     top.col += 4;
 
                     get_data(temp_id, 5);
-                    end_id = string_to_int(temp_id);
-                }while (end_id == 0);
+                    end.record_id = string_to_int(temp_id);
+                }while (end.record_id == 0);
                 break;
             case 5:
                 //don't change anything
@@ -3254,11 +3245,11 @@ void filter_records()
 
             switch (detail_menu_choice)
             {
-            case 1:
-                date_type = any;
+            case 1:     //Any
+                strcpy(start.date, "");
+                strcpy(end.date, "");
                 break;
-            case 2:
-                date_type = range;
+            case 2:     //Range
                 do
                 {
                     top.row = (25 - 4)/2;
@@ -3283,15 +3274,15 @@ void filter_records()
                     top.col += 6;
 
                     gotoxy(top.row, top.col);
-                    get_edit_date(start_date);
+                    get_edit_date(start.date);
                     top.row++;
 
                     gotoxy(top.row, top.col);
-                    get_edit_date(end_date);
-                }while (strcmpi(start_date, end_date) > 0);
+                    get_edit_date(end.date);
+                }while (strcmpi(start.date, end.date) > 0);
                 break;
-            case 3:
-                date_type = more_than;
+            case 3:     //More than
+                strcpy(end.date, "");
 
                 top.row = (25 - 3)/2;
                 top.col = (80 - 21)/2;
@@ -3306,10 +3297,10 @@ void filter_records()
 
                 gotoxy(top.row, top.col);
                 printf("Since: ");
-                get_edit_date(start_date);
+                get_edit_date(start.date);
                 break;
-            case 4:
-                date_type = less_than;
+            case 4:     //Less than
+                strcpy(start.date, "");
 
                 top.row = (25 - 3)/2;
                 top.col = (80 - 20)/2;
@@ -3324,9 +3315,10 @@ void filter_records()
 
                 gotoxy(top.row, top.col);
                 printf("Till: ");
-                get_edit_date(end_date);
+                get_edit_date(end.date);
                 break;
             case 5:
+                //don't change anything
                 break;
             }
             for (i = 0; i < 6; i++)
@@ -3344,11 +3336,10 @@ void filter_records()
 
             switch (detail_menu_choice)
             {
-            case 1:
-                amount_type = any;
+            case 1:     //Any
+                start.amount = end.amount = 0;
                 break;
-            case 2:
-                amount_type = range;
+            case 2:     //Range
                 do
                 {
                     top.row = (25 - 4)/2;
@@ -3372,7 +3363,7 @@ void filter_records()
                     top.row--;
                     top.col += 6;
 
-                    start_amount = -1;
+                    start.amount = -1;
                     do
                     {
                         for (i = 0; i < 6; i++)
@@ -3381,11 +3372,11 @@ void filter_records()
                             printf(" ");
                         }
                         gotoxy(top.row, top.col + 4);
-                        scanf("%f", &start_amount);
-                    }while(start_amount < 0);
+                        scanf("%f", &start.amount);
+                    }while(start.amount < 0);
                     top.row++;
 
-                    end_amount = -1;
+                    end.amount = -1;
                     do
                     {
                         for (i = 0; i < 6; i++)
@@ -3394,12 +3385,12 @@ void filter_records()
                             printf(" ");
                         }
                         gotoxy(top.row, top.col + 4);
-                        scanf("%f", &end_amount);
-                    }while(end_amount < 0);
-                }while (start_amount > end_amount);
+                        scanf("%f", &end.amount);
+                    }while(end.amount < 0);
+                }while (start.amount > end.amount);
                 break;
-            case 3:
-                amount_type = more_than;
+            case 3:     //More than
+                end.amount = 0;
 
                 top.row = (25 - 3)/2;
                 top.col = (80 - 25)/2;
@@ -3417,7 +3408,7 @@ void filter_records()
 
                 top.col += 7;
 
-                start_amount = -1;
+                start.amount = -1;
                 do
                 {
                     for (i = 0; i < 6; i++)
@@ -3426,11 +3417,11 @@ void filter_records()
                         printf(" ");
                     }
                     gotoxy(top.row, top.col + 4);
-                    scanf("%f", &start_amount);
-                }while(start_amount < 0);
+                    scanf("%f", &start.amount);
+                }while(start.amount < 0);
                 break;
-            case 4:
-                amount_type = less_than;
+            case 4:     //Less than
+                start.amount = 0;
 
                 top.row = (25 - 3)/2;
                 top.col = (80 - 25)/2;
@@ -3448,7 +3439,7 @@ void filter_records()
 
                 top.col += 7;
 
-                end_amount = -1;
+                end.amount = -1;
                 do
                 {
                     for (i = 0; i < 6; i++)
@@ -3457,10 +3448,11 @@ void filter_records()
                         printf(" ");
                     }
                     gotoxy(top.row, top.col + 4);
-                    scanf("%f", &end_amount);
-                }while(end_amount < 0);
+                    scanf("%f", &end.amount);
+                }while(end.amount < 0);
                 break;
             case 5:
+                //don't change anything
                 break;
             }
             for (i = 0; i < 6; i++)
@@ -3475,18 +3467,20 @@ void filter_records()
 
             detail_menu_choice = display_menu(set_detail_menu, 5, 1);
 
+            end.type = 0;
             switch (detail_menu_choice)
             {
-            case 1:
-                type_type = any;
+            case 1:     //Any
+                start.type = 0;
                 break;
-            case 2:
-                type_type = spent;
+            case 2:     //Spent
+                start.type = 'S';
                 break;
-            case 3:
-                type_type = earned;
+            case 3:     //Earned
+                start.type = 'E';
                 break;
             case 4:
+                //don't change anything
                 break;
             }
             for (i = 0; i < 6; i++)
@@ -3501,28 +3495,18 @@ void filter_records()
 
             detail_menu_choice = display_menu(set_detail_menu, 5, 1);
 
-            switch (detail_menu_choice)
-            {
-            case 1:
-                tags_type = any;
-                break;
-            case 2:
-                tags_type = any_among;
-                break;
-            case 3:
-                tags_type = all_of;
-                break;
-            case 4:
-                break;
-            }
-            for (i = 0; i < 6; i++)
-                strcpy(set_detail_menu[i], "");
-
             if ((detail_menu_choice == 2) || (detail_menu_choice == 3))
             {
-                no_of_tags = 0;
-                for (i = 0; i < no_of_tags; i++)
-                    strcpy(tags_list[i], "");
+                if (start.no_of_tags != 0)
+                {
+                    for (i = 0; i < start.no_of_tags; i++)
+                        free(start.tags_list[i]);
+                    free(start.tags_list);
+
+                    start.no_of_tags = 0;
+
+                    start.tags_list = NULL;
+                }
 
                 do
                 {
@@ -3544,14 +3528,14 @@ void filter_records()
                     }
                     top.col += 5;
 
-                    for (i = 0; i < no_of_tags; i++)
+                    for (i = 0; i < start.no_of_tags; i++)
                     {
                         gotoxy(top.row, top.col);
-                        printf("%s", tags_list[i]);
+                        printf("%s", start.tags_list[i]);
                         top.row++;
                     }
 
-                    if (no_of_tags == 5)
+                    if (start.no_of_tags == 5)
                     {
                         (void)getkey();
                         break;
@@ -3570,8 +3554,8 @@ void filter_records()
                             {
                                 flag_tag = 1;
 
-                                for (i = 0; i < no_of_tags; i++)
-                                    if (strcmpi(tags_list[i], dummy) == 0)
+                                for (i = 0; i < start.no_of_tags; i++)
+                                    if (strcmpi(start.tags_list[i], dummy) == 0)
                                     {
                                         flag_tag = 0;
                                         break;
@@ -3581,8 +3565,9 @@ void filter_records()
                         }
                         if (flag_tag == 1)
                         {
-                            no_of_tags++;
-                            strcpy(tags_list[no_of_tags - 1], dummy);
+                            start.no_of_tags++;
+                            start.tags_list = change_2D_char_array_size(start.tags_list, start.no_of_tags - 1, start.no_of_tags, PASSWORD_TAG_SIZE);
+                            strcpy(start.tags_list[start.no_of_tags - 1], dummy);
 
                             gotoxy(top.row, top.col);
                             printf("%s", dummy);
@@ -3590,12 +3575,37 @@ void filter_records()
                     }
                     else if (strlen(temp_tag) == 0)
                     {
-                        if (no_of_tags == 0)
-                            tags_type = any;
+                        if (start.no_of_tags == 0)          //Changing type to "Any"
+                            start.no_of_tags = end.no_of_tags = 0;
+
                         break;
                     }
-                }while (no_of_tags < 5);
+                }while (start.no_of_tags < 5);
             }
+
+            switch (detail_menu_choice)
+            {
+            case 1:     //Any
+                for (i = 0; i < start.no_of_tags; i++)
+                    free(start.tags_list[i]);
+                free(start.tags_list);
+
+                start.no_of_tags = end.no_of_tags = 0;
+                break;
+            case 2:     //Any among
+                //start != end
+                end.no_of_tags = 0;
+                break;
+            case 3:     //All of
+                //start == end
+                end.no_of_tags = start.no_of_tags;
+                break;
+            case 4:
+                //don't change anything
+                break;
+            }
+            for (i = 0; i < 6; i++)
+                strcpy(set_detail_menu[i], "");
             break;
         case 6:
             strcpy(set_detail_menu[0], "Set Detail, Description");
@@ -3607,12 +3617,11 @@ void filter_records()
 
             switch (detail_menu_choice)
             {
-            case 1:
-                description_type = any;
+            case 1:     //Any
+                start.description_size = 0;
+                strcpy(start.description, "");
                 break;
-            case 2:
-                description_type = keyword;
-
+            case 2:     //Keyword
                 top.row = (25 - 5)/2;
                 top.col = (80 - 63)/2;
                 bot.row = top.row + 5 - 1;
@@ -3627,9 +3636,14 @@ void filter_records()
                 gotoxy(top.row, top.col);
                 printf("Keyword: ");
                 top.col += 9;
-                get_edit_display_description(description, 2);
+                get_edit_display_description(temp_description, 2);
+
+                start.description_size = strlen(temp_description) + 1;
+                start.description = (char *)calloc(start.description_size, sizeof(char));
+                strcpy(start.description, temp_description);
                 break;
             case 3:
+                //don't change anything
                 break;
             }
             for (i = 0; i < 6; i++)
@@ -3638,69 +3652,19 @@ void filter_records()
         case 7:
             system("cls");
 
-            printf("ID type: ");
-            if (id_type == any)
-                puts("Any");
-            else if (id_type == range)
-                printf("%u to %u\n", start_id, end_id);
-            else if (id_type == more_than)
-                printf("from %u\n", start_id);
-            else if (id_type == less_than)
-                printf("to %u\n", end_id);
-            else
-                puts("Error");
+            printf("ID type: %u to %u\n", start.record_id, end.record_id);
 
-            printf("\nDate type: ");
-            if (date_type == any)
-                puts("Any");
-            else if (date_type == range)
-                printf("%s to %s\n", start_date, end_date);
-            else if (date_type == more_than)
-                printf("since %s\n", start_date);
-            else if (date_type == less_than)
-                printf("till %s\n", end_date);
-            else
-                puts("Error");
+            printf("\nDate type: %s to %s\n", start.date, end.date);
 
-            printf("\nAmount type: ");
-            if (amount_type == any)
-                puts("Any");
-            else if (amount_type == range)
-                printf("Rs.%.2f to Rs.%.2f\n", start_amount, end_amount);
-            else if (amount_type == more_than)
-                printf("above Rs.%.2f\n", start_amount);
-            else if (amount_type == less_than)
-                printf("below Rs.%.2f\n", end_amount);
-            else
-                puts("Error");
+            printf("\nAmount type: %.2f to %.2f\n", start.amount, end.amount);
 
-            printf("\nType type: ");;
-            if (type_type == any)
-                puts("Any");
-            else if (type_type == spent)
-                printf("%c\n", 'S');
-            else if (type_type == earned)
-                printf("%c\n", 'E');
-            else
-                puts("Error");
+            printf("\nType type: %u & %u\n", start.type, end.type);
 
-            printf("\nTags type: ");
-            if (tags_type == any)
-                puts("Any");
-            else if (tags_type == any_among)
-                puts("Any");
-            else if (tags_type == all_of)
-                puts("All");
-            else
-                puts("Error");
+            printf("\nID type: %u\n", start.no_of_tags);
+            for (i = 0; i < start.no_of_tags; i++)
+                printf("%s\n", start.tags_list[i]);
 
-            printf("\nDescription type: ");
-            if (description_type == any)
-                puts("Any");
-            else if (description_type == keyword)
-                puts("Keyword");
-            else
-                puts("Error");
+            printf("\nDescription type: %s\n", start.description);
 
             (void)getkey();
             break;
@@ -3717,106 +3681,6 @@ void filter_records()
             break;
         }
     }while (filter_menu_choice != 8);
-
-    /*
-    length = 10;
-    turn = id;
-    while (1)
-    {
-        top.row = (25 - length)/2;
-        top.col = (80 - 67)/2;
-        bot.row = top.row + length - 1;
-        bot.col = top.col + 67 - 1;
-
-        system("cls");
-        print_box(2, 3, 0, 2);
-
-        gotoxy(top.row + 1, (80 - strlen("FILTER RECORDS"))/2)
-        printf("FILTER RECORDS");
-
-        top.row += 3;
-        top.col += 2;
-        temp.row = top.row;
-
-        gotoxy(top.row, top.col);
-        printf("%-11s: ", "ID");
-        if (id_type == any)
-            printf("Any");
-        else if (id_type == range)
-            printf("%03u to %03u", start_id, end_id);
-        else if (id_type == more)
-            printf("From %03u", start_id);
-        else if (d_type == less)
-            printf("Up to %03u", end_id);
-        top.row++;
-
-        gotoxy(top.row, top.col);
-        printf("%-11s: ", "Date");
-        if (date_type == set)
-            printf("Set detail");
-        else if (date_type == any)
-            printf("Any");
-        else if (date_type == range)
-            printf("%s to %s", start_date, end_date);
-        else if (date_type == more)
-            printf("Since %s", start_date);
-        else if (date_type == less)
-            printf("TIll %s", end_date);
-        top.row++;
-
-        gotoxy(top.row, top.col);
-        printf("%-11s: ", "Amount");
-        if (amount_type == set)
-            printf("Set deatail");
-        else if (amount_type == any)
-            printf("Any");
-        else if (amount_type == range)
-            printf("Rs. %.2f to Rs. %.2f", start_amount, end_amount);
-        else if (amount_type == more)
-            printf("More than Rs. %.2f", start_amount);
-        else if (amount_type == less)
-            printf("Less than Rs. %.2f", end_amount);
-        top.row++;
-
-        gotoxy(top.row, top.col);
-        printf("%-11s: ", "Type");
-        if (type_type == set)
-            printf("Set detail");
-        else if (type_type == any)
-            printf("Any");
-        else if (type_type == spent)
-            printf("Spent");
-        else if (type_type == earned)
-            printf("Earned");
-        top.row++;
-
-        gotoxy(top.row, top.col);
-        printf("%-11s: ", "Tag");
-        if (tag_type == set)
-            printf("Set Detail");
-        else if (tag_type == any)
-            printf("Any");
-        else
-        {
-
-        }
-        top.row++;
-
-        gotoxy(top.row, top.col);
-        printf("%-11s:", "Description");
-        if (description_type == set)
-            printf("Set detail");
-        else if (description_type == any)
-            printf("Any");
-        else
-        {
-            top.col += 13;
-            get_edit_display_description(description, 3);
-        }
-
-        top.row = temp.row;
-    }
-    */
 }
 
 void edit_record()
