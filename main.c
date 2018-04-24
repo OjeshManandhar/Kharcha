@@ -739,10 +739,10 @@ void display_full_record(struct record_details record)
     printf("%-11s: Rs. %.2f", "Amount", record.amount);
 
     gotoxy(top.row, bot.col - 20);
-    if (record.type == 'S')
-        printf("Type: Spent");
-    else if (record.type == 'E')
-        printf("Type: Earned");
+    if (record.type == 'D')
+        printf("Type: Debit");
+    else if (record.type == 'C')
+        printf("Type: Credit");
     top.row++;
 
     display_tags_of_record(record.tags_list);
@@ -1755,10 +1755,10 @@ int diplay_a_record(const struct record_details data)
         top.row++;
 
         gotoxy(top.row, top.col);
-        if (data.type == 'S')
-            printf("%-11s: Spent", "Type");
-        else if (data.type == 'E')
-            printf("%-11s: Earned", "Type");
+        if (data.type == 'D')
+            printf("%-11s: Debit", "Type");
+        else if (data.type == 'C')
+            printf("%-11s: Credit", "Type");
         top.row++;
 
         display_tags_of_record(data.tags_list);
@@ -1887,10 +1887,10 @@ void edit_record_window(struct record_details *record)
         printf("%-11s: ", "Type");
         if (turn != type)
         {
-            if (dummy.type == 'S')
-                printf("%s", "Spent");
-            else if (dummy.type == 'E')
-                printf("%s", "Earned");
+            if (dummy.type == 'D')
+                printf("%s", "Debit");
+            else if (dummy.type == 'C')
+                printf("%s", "Credit");
         }
         top.row++;
 
@@ -1938,10 +1938,10 @@ void edit_record_window(struct record_details *record)
                 dummy.type = char_upper(dummy.type);
 
                 gotoxy(top.row + 2, top.col + 1);
-                if (dummy.type == 'S')
-                    printf("\bSpent");          //printf("pent");
-                else if (dummy.type == 'E')
-                    printf("\bEarned");         //printf("arned");
+                if (dummy.type == 'D')
+                    printf("\bDebit");          //printf("ebit");
+                else if (dummy.type == 'C')
+                    printf("\bCredit");         //printf("redit");
 
                 if (dummy.type != 'S' && dummy.type != 'E')
                     printf("\b \b");
@@ -1992,10 +1992,10 @@ void edit_record_window(struct record_details *record)
 
         gotoxy(top.row, top.col);
         printf("%-11s: ", "Type");
-        if (dummy.type == 'S')
-            printf("%s", "Spent");
+        if (dummy.type == 'D')
+            printf("%s", "Debit");
         else if (dummy.type == 'E')
-            printf("%s", "Earned");
+            printf("%s", "Credit");
         top.row++;
 
         temp.row = top.row;
@@ -2113,10 +2113,10 @@ void edit_record_window(struct record_details *record)
 
     gotoxy(top.row, top.col);
     printf("%-11s: ", "Type");
-    if (dummy.type == 'S')
-        printf("%s", "Spent");
-    else if (dummy.type == 'E')
-        printf("%s", "Earned");
+    if (dummy.type == 'D')
+        printf("%s", "Debit");
+    else if (dummy.type == 'C')
+        printf("%s", "Credit");
     top.row++;
 
     display_tags_of_record(dummy.tags_list);
@@ -2715,7 +2715,7 @@ void add_record()
         top.row++;
 
         gotoxy(top.row, top.col);
-        printf("%-11s: ", "Type [S/E]");
+        printf("%-11s: ", "Type [D/C]");
         top.row++;
 
         for (i = 1; (i <= record.no_of_tags + 1) && (i <= 5); i++)
@@ -2774,10 +2774,10 @@ void add_record()
         gotoxy(top.row, top.col);
         if (flag_type == 1)
         {
-            if (record.type == 'S')
-                printf("Spent");
-            else if (record.type == 'E')
-                printf("Earned");
+            if (record.type == 'D')
+                printf("Debit");
+            else if (record.type == 'C')
+                printf("Credit");
         }
         else
         {
@@ -2787,12 +2787,12 @@ void add_record()
                 record.type = char_upper(record.type);
 
                 gotoxy(top.row, top.col + 1);
-                if (record.type == 'S')
-                    printf("\bSpent");      //printf("pent");
-                else if (record.type == 'E')
-                    printf("\bEarned");     //printf("arned");
+                if (record.type == 'D')
+                    printf("\bDebit");      //printf("ebit");
+                else if (record.type == 'C')
+                    printf("\bCredit");     //printf("redit");
 
-                if (record.type != 'S' && record.type != 'E')
+                if (record.type != 'D' && record.type != 'C')
                     printf("\b \b");
                 else
                     break;
@@ -3461,8 +3461,8 @@ void filter_records()
         case 4:
             strcpy(set_detail_menu[0], "Set Detail, Type");
             strcpy(set_detail_menu[1], "Any");
-            strcpy(set_detail_menu[2], "Expenses");
-            strcpy(set_detail_menu[3], "Earnings");
+            strcpy(set_detail_menu[2], "Debits");
+            strcpy(set_detail_menu[3], "Credits");
             strcpy(set_detail_menu[4], "Back");
 
             detail_menu_choice = display_menu(set_detail_menu, 5, 1);
@@ -3473,11 +3473,11 @@ void filter_records()
             case 1:     //Any
                 start.type = 0;
                 break;
-            case 2:     //Spent
-                start.type = 'S';
+            case 2:     //Debits
+                start.type = 'D';
                 break;
-            case 3:     //Earned
-                start.type = 'E';
+            case 3:     //Credits
+                start.type = 'C';
                 break;
             case 4:
                 //don't change anything
@@ -3658,7 +3658,7 @@ void filter_records()
 
             printf("\nAmount type: %.2f to %.2f\n", start.amount, end.amount);
 
-            printf("\nType type: %u & %u\n", start.type, end.type);
+            printf("\nType type: %c & %c\n", start.type, end.type);
 
             printf("\nID type: %u\n", start.no_of_tags);
             for (i = 0; i < start.no_of_tags; i++)
