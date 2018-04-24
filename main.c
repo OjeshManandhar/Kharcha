@@ -3268,6 +3268,7 @@ void list_records()
         free(record.tags_list);
         free(record.description);
     }
+    fclose(fp);
 
     if (total_records == 0)
     {
@@ -3288,11 +3289,12 @@ void list_records()
 
     choice = 1;
     temp_pos_list = (long int *)calloc(total_records, sizeof(long int));
+
+    for (i = 0; i < total_records; i++)
+        temp_pos_list[i] = pos_list[i];
+
     do
     {
-        for (i = 0; i < total_records; i++)
-            temp_pos_list[i] = pos_list[i];
-
         choice = display_menu(records_list_menu_items, 8, choice);
 
         switch (choice)
@@ -3347,8 +3349,6 @@ void list_records()
             break;
         }
     }while (choice != 7);
-
-    fclose(fp);
 }
 
 void filter_records()
