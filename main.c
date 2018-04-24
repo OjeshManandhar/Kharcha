@@ -98,6 +98,7 @@ int display_record_id_window(const short int);
 int diplay_a_record(const struct record_details);
 void edit_record_window(struct record_details *);
 int display_records_list(const long int *,const unsigned int);
+int display_filter_details(const struct record_details, const struct record_details);
 
 void main_menu();
 void login();
@@ -1786,7 +1787,6 @@ int diplay_a_record(const struct record_details data)
 
         print_box(3, 0, 0, 0);
 
-        gotoxy(24, 79);
         key = getkey();
 
         if ((key == LEFT) || (key == RIGHT))
@@ -2410,6 +2410,288 @@ int display_records_list(const long int *data, const unsigned int no_of_records)
     }
 
     return 1;
+}
+
+int display_filter_details(const struct record_details start, const struct record_details end)
+{
+    uint8_t row, col;
+    int key;
+    unsigned short int i;
+    unsigned short int length;
+    unsigned short int tags_length[5] = {0};
+    unsigned short int tags_lines, description_lines, tag_description_length;
+    unsigned short int tags_line_1, tags_line_2;
+    unsigned short int choice;
+    struct position temp = {0};
+
+    for (i = 0; i < start.no_of_tags; i++)
+        tags_length[i] = strlen(start.tags_list[i]);
+
+    if (start.no_of_tags == end.no_of_tags)
+        tag_description_length = 7;
+    else
+        tag_description_length = 10;
+
+    if (start.no_of_tags <= 2)
+    {
+        tags_lines = 1;
+        tags_line_1 = start.no_of_tags;
+        tags_line_2 = 0;
+    }
+    else if (start.no_of_tags == 3)
+    {
+        if ((tag_description_length + tags_length[0] + 2 + tags_length[1] + 2 + tags_length[2]) <= 50)
+        {
+            tags_lines = 1;
+            tags_line_1 = 3;
+            tags_line_2 = 0;
+        }
+        else
+        {
+            tags_lines = 2;
+            tags_line_1 = 2;
+            tags_line_2 = 1;
+        }
+    }
+    else if (start.no_of_tags == 4)
+    {
+        if ((tag_description_length + tags_length[0] + 2 + tags_length[1] + 2 + tags_length[2] + 2 + tags_length[3]) <= 50)
+        {
+            tags_lines = 1;
+            tags_line_1 = 4;
+            tags_line_2 = 0;
+        }
+        else
+        {
+            tags_lines = 2;
+            tags_line_1 = 3;
+            tags_line_2 = 1;
+        }
+    }
+    else if (start.no_of_tags == 5)
+    {
+        if ((tag_description_length + tags_length[0] + 2 + tags_length[1] + 2 + tags_length[2] + 2 + tags_length[3] + 2 + tags_length[4]) <= 50)
+        {
+            tags_lines = 1;
+            tags_line_1 = 5;
+            tags_line_2 = 0;
+        }
+        else if ((tag_description_length + tags_length[0] + 2 + tags_length[1] + 2 + tags_length[2] + 2 + tags_length[3] + 1) <= 50)
+        {
+            tags_lines = 2;
+            tags_line_1 = 4;
+            tags_line_2 = 1;
+        }
+        else
+        {
+            tags_lines = 2;
+            tags_line_1 = 3;
+            tags_line_2 = 2;
+        }
+    }
+
+    if (start.description_size == 0)
+        description_lines = 1;
+    else
+    {
+        length = 12;
+        for (i = 0; start.description[i] != 0; i++)
+            if (start.description[i] == '\t')
+                length += 8;
+            else
+                length++;
+
+        description_lines = ((length - 1)/50) + 1;
+    }
+
+    length = 3 + 4 + tags_lines + description_lines + 1 + 3 + 1;
+
+    system("cls");
+
+    top.row = (25 - length)/2;
+    top.col = (80 - 67)/2;
+    bot.row = top.row + length - 1;
+    bot.col = top.col + 67 - 1;
+
+    print_box(2, 3, length - 4, 2);
+
+    top.row++;
+    gotoxy(top.row, (80 - strlen("FILTER RECORD DETAIL"))/2);
+    printf("FILTER RECORD DETAIL");
+    top.row += 2;
+    top.col += 2;
+
+    gotoxy(top.row, top.col);
+    printf("%-11s: ", "ID");
+    if (start.record_id == end.record_id)
+        printf("Any");
+    else if ((start.record_id != 0) && (end.record_id == 0))
+        printf("More than %u", start.record_id);
+    else if ((start.record_id == 0) && (end.record_id != 0))
+        printf("Less than %u", end.record_id);
+    else
+        printf("%u to %u", start.record_id, end.record_id);
+    top.row++;
+
+    gotoxy(top.row, top.col);
+    printf("%-11s: ", "Date");
+    if (strlen(start.date) == strlen(end.date))
+        printf("Any");
+    else if ((strlen(start.date) != 0) && (strlen(end.date) == 0))
+        printf("Since %s", start.date);
+    else if ((strlen(start.date) == 0) && (strlen(end.date) != 0))
+        printf("Till %s", end.date);
+    else
+        printf("%s to %s", start.date, end.date);
+    top.row++;
+
+    gotoxy(top.row, top.col);
+    printf("%-11s: ", "Amount");
+    if (start.amount == end.amount)
+        printf("Any");
+    else if ((start.amount != 0) && (end.amount == 0))
+        printf("Above Rs.%.2f", start.amount);
+    else if ((start.amount == 0) && (end.amount != 0))
+        printf("Below Rs.%.2f", end.amount);
+    else
+        printf("Rs.%.2f to Rs.%.2f", start.amount, end.amount);
+    top.row++;
+
+    gotoxy(top.row, top.col);
+    printf("%-11s: ", "Type");
+    if (start.type == 0)
+        printf("Any");
+    else if (start.type == 'D')
+        printf("Debits only");
+    else if (start.type == 'C')
+        printf("Credits only");
+    top.row++;
+
+    gotoxy(top.row, top.col);
+    printf("%-11s: ", "Tags");
+    if (start.no_of_tags == 0)
+        printf("Any");
+    else if (start.no_of_tags == 1)
+        printf("%s", start.tags_list[0]);
+    else
+    {
+        if (start.no_of_tags == end.no_of_tags)
+            printf("All of ");
+        else
+            printf("Any among ");
+
+        for (i = 0; i < (tags_line_1 - 1); i++)
+            printf("%s, ", start.tags_list[i]);
+        if (tags_lines == 1)
+            printf("%s", start.tags_list[i]);
+        else if (tags_lines == 2)
+        {
+            printf("%s,", start.tags_list[i]);
+
+            top.row++;
+            gotoxy(top.row, top.col + 13);
+            for (i = tags_line_1; i < (tags_line_1 + tags_line_2 - 1); i++)
+                printf("%s, ", start.tags_list[i]);
+            printf("%s", start.tags_list[i]);
+        }
+    }
+    top.row++;
+
+    gotoxy(top.row, top.col);
+    printf("Description: ");
+    if (start.description_size == 0)
+        printf("Any");
+    else
+    {
+        printf("Containing \"");
+
+        temp.row = top.row;
+        temp.col = top.col + 13;
+        row = 0;
+        col = 12;
+        i = 0;
+
+        while (start.description[i] != 0)
+        {
+            gotoxy(temp.row + row, temp.col + col);
+            if (start.description[i] == '\t')
+                col += 8;
+            else
+            {
+                putch(start.description[i]);
+                col++;
+            }
+
+            if (col > 49 && row < 3)
+            {
+                row++;
+                col -= 50;
+            }
+
+            i++;
+        }
+        printf("\"");
+    }
+
+    top.row = bot.row - 3;
+    bot.row--;
+
+    gotoxy(top.row + 1, 13);
+    printf("%s", "Any Criteria");
+    gotoxy(top.row + 1, 34);
+    printf("%s", "All Criteria");
+    gotoxy(top.row + 1, 58);
+    printf("%s", "Cancel");
+
+    choice = 3;
+    while (1)
+    {
+        top.col = 8;
+        bot.col = top.col + 21 - 1;
+        if (choice == 1)
+            print_box(3, 0, 0, 0);
+        else
+            print_box(' ', 0, 0, 0);
+
+        top.col = 29;
+        bot.col = top.col + 21 - 1;
+        if (choice == 2)
+            print_box(3, 0, 0, 0);
+        else
+            print_box(' ', 0, 0, 0);
+
+        top.col = 50;
+        bot.col = top.col + 21 - 1;
+        if (choice == 3)
+            print_box(3, 0, 0, 0);
+        else
+            print_box(' ', 0, 0, 0);
+
+        key = getkey();
+
+        if (key == LEFT)
+        {
+            if (choice == 1)
+                choice = 3;
+            else if (choice == 2)
+                choice = 1;
+            else if (choice == 3)
+                choice = 2;
+        }
+        else if (key == RIGHT)
+        {
+            if (choice == 1)
+                choice = 2;
+            else if (choice == 2)
+                choice = 3;
+            else if (choice == 3)
+                choice = 1;
+        }
+        else if (key == ESC)
+            return 3;
+        else if (key == ENTER)
+            return choice;
+    }
 }
 
 void main_menu()
@@ -3073,6 +3355,7 @@ void filter_records()
 {
     FILE *fp, *f_tags;
     short int i;
+    short int filter_choice;
     int filter_menu_choice, detail_menu_choice;
     char temp_id[11] = "";
     char **filter_menu_detial = NULL;
@@ -3619,9 +3902,12 @@ void filter_records()
             {
             case 1:     //Any
                 start.description_size = 0;
-                strcpy(start.description, "");
                 break;
             case 2:     //Keyword
+                if (start.description_size > 0)
+                    free(start.description);
+                start.description_size = 0;
+
                 top.row = (25 - 5)/2;
                 top.col = (80 - 63)/2;
                 bot.row = top.row + 5 - 1;
@@ -3638,9 +3924,14 @@ void filter_records()
                 top.col += 9;
                 get_edit_display_description(temp_description, 2);
 
-                start.description_size = strlen(temp_description) + 1;
-                start.description = (char *)calloc(start.description_size, sizeof(char));
-                strcpy(start.description, temp_description);
+                if (strlen(temp_description) == 0)
+                    start.description_size = 0;
+                else
+                {
+                    start.description_size = strlen(temp_description) + 1;
+                    start.description = (char *)calloc(start.description_size, sizeof(char));
+                    strcpy(start.description, temp_description);
+                }
                 break;
             case 3:
                 //don't change anything
@@ -3650,23 +3941,12 @@ void filter_records()
                 strcpy(set_detail_menu[i], "");
             break;
         case 7:
+            filter_choice = display_filter_details(start, end);
+
             system("cls");
-
-            printf("ID type: %u to %u\n", start.record_id, end.record_id);
-
-            printf("\nDate type: %s to %s\n", start.date, end.date);
-
-            printf("\nAmount type: %.2f to %.2f\n", start.amount, end.amount);
-
-            printf("\nType type: %c & %c\n", start.type, end.type);
-
-            printf("\nID type: %u\n", start.no_of_tags);
-            for (i = 0; i < start.no_of_tags; i++)
-                printf("%s\n", start.tags_list[i]);
-
-            printf("\nDescription type: %s\n", start.description);
-
+            printf("filter_choice = %d\n", filter_choice);
             (void)getkey();
+
             break;
         case 8:
             for (i = 0; i < 9; i++)
