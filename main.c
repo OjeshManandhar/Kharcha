@@ -75,7 +75,7 @@ void display_tags_of_record(char **);
 void display_half_description(char *);
 void display_full_record(struct record_details);
 void display_half_record(struct record_details, const short int, const short int);
-int get_filtered_record(const struct record_details, const struct record_details, const int, long int *);
+long int *get_filtered_record(const struct record_details, const struct record_details, const int, unsigned int *);
 
 //compare function
 int tag_compare_ascending(const void *, const void *);
@@ -885,7 +885,7 @@ void display_half_record(struct record_details record, const short int type, con
     }
 }
 
-int get_filtered_record(const struct record_details start, const struct record_details end, const int type, long int *list)
+long int *get_filtered_record(const struct record_details start, const struct record_details end, const int type, unsigned int *t)
 {
     /*
     type & tag_type:
@@ -897,16 +897,19 @@ int get_filtered_record(const struct record_details start, const struct record_d
     uint8_t flag, tag_flag;
     uint8_t pass, tag_pass;
     short int i, j;
-    int total;
+    unsigned int total;
     long int temp_pos;
+    long int *list = NULL;
     struct record_details record = {0};
 
-    fp = fopen("records.dat", "rd");
+    fp = fopen("records.dat", "rb");
     if (fp == NULL)
     {
         print_detail("PROCESS FAILED");
-        return -1;
+        *t = 1;         //Indicatiog error
+        return NULL;
     }
+    //*t = 0 and list = NULL indicates no records
 
     total = 0;
     fseek(fp, 0, SEEK_SET);
@@ -932,7 +935,12 @@ int get_filtered_record(const struct record_details start, const struct record_d
             //Record ID
             flag = 0;
             if (start.record_id == end.record_id)
-                flag = 1;
+            {
+                if (type == 1)
+                    flag = 0;
+                else
+                    flag = 1;
+            }
             else if ((start.record_id != 0) && (end.record_id == 0))
             {
                 if (record.record_id >= start.record_id)
@@ -961,8 +969,13 @@ int get_filtered_record(const struct record_details start, const struct record_d
 
             //Date
             flag = 0;
-            if (strlen(start.date) == strlen(end.date))
-                flag = 1;
+            if (strcmpi(start.date, end.date) == 0)
+            {
+                if (type == 1)
+                    flag = 0;
+                else
+                    flag = 1;
+            }
             else if ((strlen(start.date) != 0) && (strlen(end.date) == 0))
             {
                 if (strcmpi(record.date, start.date) >= 0)
@@ -992,7 +1005,12 @@ int get_filtered_record(const struct record_details start, const struct record_d
             //Amount
             flag = 0;
             if (start.amount == end.amount)
-                flag = 1;
+            {
+                if (type == 1)
+                    flag = 0;
+                else
+                    flag = 1;
+            }
             else if ((start.amount != 0) && (end.amount == 0))
             {
                 if (record.amount >= start.amount)
@@ -1022,7 +1040,12 @@ int get_filtered_record(const struct record_details start, const struct record_d
             //Type
             flag = 0;
             if (start.type == 0)
-                flag = 1;
+            {
+                if (type == 1)
+                    flag = 0;
+                else
+                    flag = 1;
+            }
             else if ((start.type == 'D') && (record.type == 'D'))
                 flag = 1;
             else if ((start.type == 'C') && (record.type == 'C'))
@@ -1042,7 +1065,12 @@ int get_filtered_record(const struct record_details start, const struct record_d
             flag = 0;
             tag_type = 0;
             if (start.no_of_tags == 0)
-                flag = 1;
+            {
+                if (type == 1)
+                    flag = 0;
+                else
+                    flag = 1;
+            }
             else if (start.no_of_tags != end.no_of_tags)
                 tag_type = 1;
             else if (start.no_of_tags == end.no_of_tags)
@@ -1052,11 +1080,11 @@ int get_filtered_record(const struct record_details start, const struct record_d
             {
                 if ((tag_type == 2) && (record.no_of_tags < start.no_of_tags))
                 {
-                    tag_flag = 0;
+                    tag_pass = 0;
                 }
                 else
                 {
-                    for (i = 0; i < start.no_of_tags; i++)
+                    for (tag_pass = 0, i = 0; i < start.no_of_tags; i++)
                     {
                         for (tag_flag = 0, j = 0; j < record.no_of_tags; j++)
                             if (strcmpi(start.tags_list[i], record.tags_list[j]) == 0)
@@ -1066,16 +1094,14 @@ int get_filtered_record(const struct record_details start, const struct record_d
                             }
 
                         if (tag_type == 1 && tag_flag == 1)
-                        {
-                            tag_pass = 1;
                             break;
-                        }
                         else if (tag_type == 2 && tag_flag == 0)
-                        {
-                            tag_pass = 0;
                             break;
-                        }
                     }
+                    if (tag_flag == 0)
+                        tag_pass = 0;
+                    else if (tag_flag == 1)
+                        tag_pass = 1;
                 }
 
                 if (tag_pass == 0)
@@ -1097,7 +1123,12 @@ int get_filtered_record(const struct record_details start, const struct record_d
             //Description
             flag = 0;
             if (start.description_size == 0)
-                flag = 1;
+            {
+                if (type == 1)
+                    flag = 0;
+                else
+                    flag = 1;
+            }
             else
             {
                 if (record.description_size < start.description_size)
@@ -1115,6 +1146,9 @@ int get_filtered_record(const struct record_details start, const struct record_d
                 pass = 0;
                 break;
             }
+
+            pass = 1;
+            break;
         }
 
         if (pass == 1)
@@ -1132,7 +1166,9 @@ int get_filtered_record(const struct record_details start, const struct record_d
         free(record.description);
     }
 
-    return total;
+    fclose(fp);
+    *t = total;
+    return list;
 }
 
 int tag_compare_ascending(const void *elem1, const void *elem2)
@@ -2786,7 +2822,7 @@ int display_filter_details(const struct record_details start, const struct recor
 
     gotoxy(top.row, top.col);
     printf("%-11s: ", "Date");
-    if (strlen(start.date) == strlen(end.date))
+    if (strcmpi(start.date, end.date) == 0)
         printf("Any");
     else if ((strlen(start.date) != 0) && (strlen(end.date) == 0))
         printf("Since %s", start.date);
@@ -2894,7 +2930,7 @@ int display_filter_details(const struct record_details start, const struct recor
     gotoxy(top.row + 1, 58);
     printf("%s", "Cancel");
 
-    choice = 3;
+    choice = 1;
     while (1)
     {
         top.col = 8;
@@ -3605,6 +3641,7 @@ void list_records()
 void filter_records()
 {
     FILE *fp, *f_tags;
+    uint8_t flag;
     short int i;
     short int filter_choice;
     int filter_menu_choice, detail_menu_choice;
@@ -3786,6 +3823,9 @@ void filter_records()
                 strcpy(end.date, "");
                 break;
             case 2:     //Range
+                strcpy(start.date, "");
+                strcpy(end.date, "");
+
                 do
                 {
                     top.row = (25 - 4)/2;
@@ -3876,6 +3916,8 @@ void filter_records()
                 start.amount = end.amount = 0;
                 break;
             case 2:     //Range
+                start.amount = end.amount = 0;
+
                 do
                 {
                     top.row = (25 - 4)/2;
@@ -4194,17 +4236,35 @@ void filter_records()
                 strcpy(set_detail_menu[i], "");
             break;
         case 7:
-            filter_choice = display_filter_details(start, end);
+            flag = 0;
 
-            system("cls");
-            printf("filter_choice = %d\n", filter_choice);
+            filter_choice = display_filter_details(start, end);
 
             if (filter_choice == 3)
                 break;
 
-            total = get_filtered_record(start, end, filter_choice, pos_list);
+            if (start.record_id != end.record_id)
+                flag = 1;
+            if (strlen(start.date) != strlen(end.date))
+                flag = 1;
+            if (start.amount != end.amount)
+                flag = 1;
+            if (start.type != 0)
+                flag = 1;
+            if (start.no_of_tags != 0)
+                flag = 1;
+            if (start.description_size != 0)
+                flag = 1;
 
-            if (total == -1)
+            if (flag == 0)
+            {
+                print_detail("Give atleast one criteria");
+                break;
+            }
+
+            pos_list = get_filtered_record(start, end, filter_choice, &total);
+
+            if ((pos_list == NULL) && (total == 1))
             {
                 for (i = 0; i < 9; i++)
                     free(filter_menu_detial[i]);
@@ -4214,14 +4274,14 @@ void filter_records()
                     free(set_detail_menu[i]);
                 free(set_detail_menu);
 
+                fclose(f_tags);
                 return;
             }
 
-            for (i = 0; i < total; i++)
-                printf("%ld\n", pos_list[i]);
+            if (display_records_list(pos_list, total) == 0)
+                print_detail("PROCESS FAILED");
 
-            (void)getkey();
-
+            free(pos_list);
             break;
         case 8:
             for (i = 0; i < 9; i++)
