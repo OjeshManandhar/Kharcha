@@ -1147,7 +1147,8 @@ long int *get_filtered_record(const struct record_details start, const struct re
                 break;
             }
 
-            pass = 1;
+            if (type == 2)
+                pass = 1;
             break;
         }
 
