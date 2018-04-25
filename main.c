@@ -65,7 +65,7 @@ int getkey();
 void gotoxy(const short int, const short int);
 void print_box(const short int, const short int, const short int, const short int);
 void print_detail(const char *);
-int get_conformation(const char *);
+int get_conformation(const char *, const char *);
 void get_system_date(char *);
 int check_date(char *);
 long int read_record(const long int position, struct record_details *);
@@ -366,37 +366,71 @@ void print_detail(const char *data)
     getch();
 }
 
-int get_conformation(const char *data)
+int get_conformation(const char *data1, const char *data2)
 {
+    short unsigned int temp_top_col, temp_bot_col;
+    short unsigned int length, breadth;
     short unsigned int len, key, choice = 0;
+
+    length = 6;
+    breadth = 4;
+    if (data2 == NULL)
+    {
+        length += 1;
+        breadth += 22;
+    }
+    else
+    {
+        length += 3;
+        breadth += strlen(data2);
+    }
 
     while (1)
     {
         system("cls");
 
-        top.row = 9;
-        top.col = 27;
-        bot.row = 15;
-        bot.col = 51;
-        print_box(2, 3, 0, 2);
+        top.row = (25 - length)/2;
+        top.col = (80 - breadth)/2;
+        bot.row = top.row + length - 1;
+        bot.col = top.col + breadth - 1;
 
-        len = strlen(data);
-        gotoxy(top.row + 1, ((79 - len)/2));
-        printf("%s", data);
+        temp_top_col = top.col + 2;
+        temp_bot_col = bot.col - 2;
+
+        if (data2 == NULL)
+            print_box(2, 3, 0, 2);
+        else
+            print_box(2, 5, 0, 2);
+
+        len = strlen(data1);
+        gotoxy(top.row + 1, ((80 - len)/2));
+        printf("%s", data1);
+
+        if (data2 != NULL)
+        {
+            top.row += 2;
+            gotoxy(top.row + 1, top.col + 2);
+            printf("%s", data2);
+        }
 
         top.row += 3;
         bot.row = top.row + 2;
 
-        gotoxy(top.row + 1, top.col + 5);
+        gotoxy(top.row + 1, (39 - (temp_top_col - 1) - 3)/2 + temp_top_col);
         printf("Yes");
-        gotoxy(top.row + 1, bot.col - 7);
+        gotoxy(top.row + 1, (temp_bot_col - (39 - 1) - 2)/2 + 39);
         printf("No");
 
         if (choice == 1)
-            top.col = 28;
+        {
+            top.col = temp_top_col;
+            bot.col = 39;
+        }
         else if (choice == 0)
+        {
             top.col = 40;
-        bot.col = top.col + 10;
+            bot.col = temp_bot_col;
+        }
         print_box(3, 0, 0, 0);
 
         key = getkey();
@@ -3141,7 +3175,7 @@ void login_menu()           //login_menu kholda jasle login garyo tesko folder v
             }
             break;
         case 4:
-            if (get_conformation("CONFORM LOGOUT") == 1)
+            if (get_conformation("CONFORM LOGOUT", NULL) == 1)
             {
                 for (i = 0; i < 5; i++)
                     free(login_menu_items[i]);
@@ -4779,7 +4813,7 @@ void edit_tag()
     while (fread(dummy, sizeof(dummy), 1, fp) == 1)
         if (strcmp(dummy, old_tag) == 0)
         {
-            if (get_conformation("CONFORM CHANGE") == 1)
+            if (get_conformation("CONFORM CHANGE", NULL) == 1)
             {
                 flag = 1;
                 fwrite(new_tag, sizeof(new_tag), 1, temp);
@@ -4841,7 +4875,7 @@ void delete_tag()
     while (fread(dummy, sizeof(dummy), 1, fp) == 1)
         if (strcmpi(dummy, tag) == 0)
         {
-            if (get_conformation("CONFORM DELETE") == 1)
+            if (get_conformation("CONFORM DELETE", NULL) == 1)
             {
                 flag = 1;
                 print_detail("TAG DELETED");
@@ -4949,7 +4983,7 @@ void change_password()
 
     if ((strcmp(old_password, loged_in_as.password) == 0) && (strcmp(new_password, confirm_password) == 0))
     {
-        if (get_conformation("CONFORM CHANGE") == 1)
+        if (get_conformation("CONFORM CHANGE", NULL) == 1)
         {
             strcpy(loged_in_as.password, new_password);
 
@@ -5002,7 +5036,7 @@ void delete_account()
 
     if (strcmp(data.password, loged_in_as.password) == 0)
     {
-        if (get_conformation("CONFORM DELETE") == 1)
+        if (get_conformation("CONFORM DELETE", NULL) == 1)
         {
             total_accounts--;
 
