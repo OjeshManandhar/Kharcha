@@ -2194,7 +2194,7 @@ void edit_record_window(struct record_details *record)
                 else if (dummy.type == 'C')
                     printf("\bCredit");         //printf("redit");
 
-                if (dummy.type != 'S' && dummy.type != 'E')
+                if (dummy.type != 'D' && dummy.type != 'C')
                     printf("\b \b");
                 else
                     break;
@@ -2245,7 +2245,7 @@ void edit_record_window(struct record_details *record)
         printf("%-11s: ", "Type");
         if (dummy.type == 'D')
             printf("%s", "Debit");
-        else if (dummy.type == 'E')
+        else if (dummy.type == 'C')
             printf("%s", "Credit");
         top.row++;
 
