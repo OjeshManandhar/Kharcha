@@ -4801,6 +4801,7 @@ void edit_tag()
             fclose(f_tags);
             return;
         }
+
     temp_tags = fopen("temp_tags.dat", "wb");
     if (temp_tags == NULL)
     {
@@ -4872,7 +4873,7 @@ void edit_tag()
                             else
                             {
                                 conformation = 0;
-                                fwrite(dummy, sizeof(new_tag), 1, temp_tags);
+                                fwrite(dummy, sizeof(dummy), 1, temp_tags);
                             }
                         }
 
@@ -4906,7 +4907,7 @@ void edit_tag()
                     print_detail("TAG EDITED");
                 }
                 else
-                    fwrite(dummy, sizeof(new_tag), 1, temp_tags);
+                    fwrite(dummy, sizeof(dummy), 1, temp_tags);
             }
             else if (conformation == 0)
                 print_detail("CANCELLED");
@@ -4928,12 +4929,16 @@ void edit_tag()
 
 void delete_tag()
 {
-    FILE *temp, *fp;
-    uint8_t flag;
+    FILE *fp, *temp;
+    FILE *f_tags, *temp_tags;
+    int8_t conformation;
+    uint8_t flag, flag_record;
+    unsigned short int i;
     char tag[PASSWORD_TAG_SIZE] = "", dummy[PASSWORD_TAG_SIZE] = "";
+    struct record_details record;
 
-    fp = fopen("tags.dat", "rb");
-    if (fp == NULL)
+    f_tags = fopen("tags.dat", "rb");
+    if (f_tags == NULL)
     {
         print_detail("PROCESS FAILED");
         return;
@@ -4944,47 +4949,175 @@ void delete_tag()
     if (strcmpi(tag, "Others") == 0)
     {
         print_detail("CANT DELETE THIS TAG");
-        fclose(fp);
+        fclose(f_tags);
         return;
     }
 
-    temp = fopen("temp.dat", "wb");
-    if (temp == NULL)
+    temp_tags = fopen("temp_tags.dat", "wb");
+    if (temp_tags == NULL)
     {
-        fclose(fp);
+        fclose(f_tags);
 
         print_detail("PROCESS FAILED");
         return;
     }
 
-    fseek(fp, 0, SEEK_SET);
+    fseek(f_tags, 0, SEEK_SET);
     flag = 0;
-    while (fread(dummy, sizeof(dummy), 1, fp) == 1)
+    while (fread(dummy, sizeof(dummy), 1, f_tags) == 1)
         if (strcmpi(dummy, tag) == 0)
         {
-            if (get_conformation("CONFORM DELETE", NULL) == 1)
+            flag = 1;
+
+            fp = fopen("records.dat", "rb");
+            if (fp == NULL)
             {
-                flag = 1;
-                print_detail("TAG DELETED");
+                print_detail("PROCESS FAILED");
+                fclose(f_tags);
+                fclose(temp_tags);
+                return;
             }
-            else
+
+            temp = fopen("temp.dat", "wb");
+            if (temp == NULL)
             {
-                flag = 1;
-                fwrite(dummy, sizeof(dummy), 1, temp);
+                print_detail("PROCESS FAILED");
+                fclose(fp);
+                fclose(f_tags);
+                fclose(temp_tags);
+                return;
+            }
+
+            conformation = -1;
+            while (fread(&record.record_id, sizeof(unsigned int), 1, fp) == 1)
+            {
+                flag_record = 0;
+
+                fread(record.date, sizeof(record.date), 1, fp);
+                fread(&record.amount, sizeof(float), 1, fp);
+                fread(&record.type, sizeof(char), 1, fp);
+
+                fread(&record.no_of_tags, sizeof(short int), 1, fp);
+                record.tags_list = get_2D_char_array(record.no_of_tags, PASSWORD_TAG_SIZE);
+                for (i = 0; i < record.no_of_tags; i++)
+                    fread(record.tags_list[i], PASSWORD_TAG_SIZE*sizeof(char), 1, fp);
+
+                fread(&record.description_size, sizeof(short int), 1, fp);
+                record.description = (char *)calloc(record.description_size, sizeof(char));
+                fread(record.description, record.description_size*sizeof(char), 1, fp);
+
+                //Writing in temp.dat
+                fwrite(&record.record_id, sizeof(unsigned int), 1, temp);
+                fwrite(record.date, sizeof(record.date), 1, temp);
+                fwrite(&record.amount, sizeof(float), 1, temp);
+                fwrite(&record.type, sizeof(char), 1, temp);
+
+                for (i = 0; i < record.no_of_tags; i++)
+                    if (strcmp(dummy, record.tags_list[i]) == 0)
+                    {
+                        flag_record = 1;
+
+                        if (conformation == -1)
+                        {
+                            if (get_conformation("CONFORM DELETE", "This will remove this tag in all the record it is used in") == 1)
+                                conformation = 1;
+                            else
+                            {
+                                conformation = 0;
+                                fwrite(dummy, sizeof(dummy), 1, temp_tags);
+                            }
+                        }
+
+                        break;
+                    }
+
+                if (flag_record == 0)
+                {
+                    fwrite(&record.no_of_tags, sizeof(short int), 1, temp);
+                    for (i = 0; i < record.no_of_tags; i++)
+                        fwrite(record.tags_list[i], PASSWORD_TAG_SIZE*sizeof(char), 1, temp);
+
+                    for (i = 0; i < record.no_of_tags; i++)
+                        free(record.tags_list[i]);
+                }
+                else if (flag_record == 1)
+                {
+                    if (conformation == 0)
+                    {
+                        fwrite(&record.no_of_tags, sizeof(short int), 1, temp);
+                        for (i = 0; i < record.no_of_tags; i++)
+                            fwrite(record.tags_list[i], PASSWORD_TAG_SIZE*sizeof(char), 1, temp);
+
+                        for (i = 0; i < record.no_of_tags; i++)
+                            free(record.tags_list[i]);
+                    }
+                    else if (conformation == 1)
+                    {
+                        if (record.no_of_tags == 1)
+                        {
+                            fwrite(&record.no_of_tags, sizeof(short int), 1, temp);
+
+                            if (strcmp(dummy, record.tags_list[0]) == 0)
+                                strcpy(record.tags_list[0], "Others");
+
+                            fwrite(record.tags_list[0], PASSWORD_TAG_SIZE*sizeof(char), 1, temp);
+
+                            for (i = 0; i < record.no_of_tags; i++)
+                                free(record.tags_list[i]);
+                        }
+                        else
+                        {
+                            record.no_of_tags--;
+                            fwrite(&record.no_of_tags, sizeof(short int), 1, temp);
+
+                            for (i = 0; i <= record.no_of_tags; i++)
+                                if (strcmp(dummy, record.tags_list[i]) != 0)
+                                    fwrite(record.tags_list[i], PASSWORD_TAG_SIZE*sizeof(char), 1, temp);
+
+                            for (i = 0; i <= record.no_of_tags; i++)
+                                free(record.tags_list[i]);
+                        }
+                    }
+                }
+
+                fwrite(&record.description_size, sizeof(short int), 1, temp);
+                fwrite(record.description, record.description_size*sizeof(char), 1, temp);
+
+                free(record.tags_list);
+                free(record.description);
+            }
+
+            fclose(fp);
+            fclose(temp);
+            remove("records.dat");
+            rename("temp.dat", "records.dat");
+
+            if (conformation == -1)
+            {
+                if (get_conformation("CONFORM DELETE", NULL) == 1)
+                {
+                    fwrite(tag, sizeof(tag), 1, temp_tags);
+                    print_detail("TAG DELETED");
+                }
+                else
+                    fwrite(dummy, sizeof(dummy), 1, temp_tags);
+            }
+            else if (conformation == 0)
                 print_detail("CANCELLED");
-            }
+            else if (conformation == 1)
+                print_detail("TAG DELETED");
         }
         else
-            fwrite(dummy, sizeof(dummy), 1, temp);
+            fwrite(dummy, sizeof(dummy), 1, temp_tags);
 
     if (flag == 0)
         print_detail("TAG NOT FOUND");
 
-    fclose(fp);
-    fclose(temp);
+    fclose(f_tags);
+    fclose(temp_tags);
 
     remove("tags.dat");
-    rename("temp.dat", "tags.dat");
+    rename("temp_tags.dat", "tags.dat");
 }
 
 void settings_menu()
