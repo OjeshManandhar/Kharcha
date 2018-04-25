@@ -75,6 +75,7 @@ void display_tags_of_record(char **);
 void display_half_description(char *);
 void display_full_record(struct record_details);
 void display_half_record(struct record_details, const short int, const short int);
+int get_filtered_record(const struct record_details, const struct record_details, const int, long int *);
 
 //compare function
 int tag_compare_ascending(const void *, const void *);
@@ -882,6 +883,256 @@ void display_half_record(struct record_details record, const short int type, con
         top.row++;
         top.col -= 2;
     }
+}
+
+int get_filtered_record(const struct record_details start, const struct record_details end, const int type, long int *list)
+{
+    /*
+    type & tag_type:
+    1 => Any
+    2 => All
+    */
+    FILE *fp;
+    uint8_t tag_type;
+    uint8_t flag, tag_flag;
+    uint8_t pass, tag_pass;
+    short int i, j;
+    int total;
+    long int temp_pos;
+    struct record_details record = {0};
+
+    fp = fopen("records.dat", "rd");
+    if (fp == NULL)
+    {
+        print_detail("PROCESS FAILED");
+        return -1;
+    }
+
+    total = 0;
+    fseek(fp, 0, SEEK_SET);
+    temp_pos = ftell(fp);
+    while (fread(&record.record_id, sizeof(unsigned int), 1, fp) == 1)
+    {
+        fread(record.date, sizeof(record.date), 1, fp);
+        fread(&record.amount, sizeof(float), 1, fp);
+        fread(&record.type, sizeof(char), 1, fp);
+
+        fread(&record.no_of_tags, sizeof(short int), 1, fp);
+        record.tags_list = get_2D_char_array(record.no_of_tags, PASSWORD_TAG_SIZE);
+        for (i = 0; i < record.no_of_tags; i++)
+            fread(record.tags_list[i], PASSWORD_TAG_SIZE*sizeof(char), 1, fp);
+
+        fread(&record.description_size, sizeof(short int), 1, fp);
+        record.description = (char *)calloc(record.description_size, sizeof(char));
+        fread(record.description, record.description_size*sizeof(char), 1, fp);
+
+        pass = 0;
+        while (1)
+        {
+            //Record ID
+            flag = 0;
+            if (start.record_id == end.record_id)
+                flag = 1;
+            else if ((start.record_id != 0) && (end.record_id == 0))
+            {
+                if (record.record_id >= start.record_id)
+                    flag = 1;
+            }
+            else if ((start.record_id == 0) && (end.record_id != 0))
+            {
+                if (record.record_id <= end.record_id)
+                    flag = 1;
+            }
+            else
+            {
+                if ((record.record_id >= start.record_id) && (record.record_id <= end.record_id))
+                    flag = 1;
+            }
+            if (type == 1 && flag == 1)
+            {
+                pass = 1;
+                break;
+            }
+            else if (type == 2 && flag == 0)
+            {
+                pass = 0;
+                break;
+            }
+
+            //Date
+            flag = 0;
+            if (strlen(start.date) == strlen(end.date))
+                flag = 1;
+            else if ((strlen(start.date) != 0) && (strlen(end.date) == 0))
+            {
+                if (strcmpi(record.date, start.date) >= 0)
+                    flag = 1;
+            }
+            else if ((strlen(start.date) == 0) && (strlen(end.date) != 0))
+            {
+                if (strcmpi(record.date, end.date) <= 0)
+                    flag = 1;
+            }
+            else
+            {
+                if ((strcmpi(record.date, start.date) >= 0) && (strcmpi(record.date, end.date) <= 0))
+                    flag = 1;
+            }
+            if (type == 1 && flag == 1)
+            {
+                pass = 1;
+                break;
+            }
+            else if (type == 2 && flag == 0)
+            {
+                pass = 0;
+                break;
+            }
+
+            //Amount
+            flag = 0;
+            if (start.amount == end.amount)
+                flag = 1;
+            else if ((start.amount != 0) && (end.amount == 0))
+            {
+                if (record.amount >= start.amount)
+                    flag = 1;
+            }
+            else if ((start.amount == 0) && (end.amount != 0))
+            {
+                if (record.amount <= end.amount)
+                    flag = 1;
+            }
+            else
+            {
+                if ((record.amount >= start.amount) && (record.amount <= end.amount))
+                    flag = 1;
+            }
+            if (type == 1 && flag == 1)
+            {
+                pass = 1;
+                break;
+            }
+            else if (type == 2 && flag == 0)
+            {
+                pass = 0;
+                break;
+            }
+
+            //Type
+            flag = 0;
+            if (start.type == 0)
+                flag = 1;
+            else if ((start.type == 'D') && (record.type == 'D'))
+                flag = 1;
+            else if ((start.type == 'C') && (record.type == 'C'))
+                flag = 1;
+            if (type == 1 && flag == 1)
+            {
+                pass = 1;
+                break;
+            }
+            else if (type == 2 && flag == 0)
+            {
+                pass = 0;
+                break;
+            }
+
+            //Tags
+            flag = 0;
+            tag_type = 0;
+            if (start.no_of_tags == 0)
+                flag = 1;
+            else if (start.no_of_tags != end.no_of_tags)
+                tag_type = 1;
+            else if (start.no_of_tags == end.no_of_tags)
+                tag_type = 2;
+
+            if (tag_type != 0)
+            {
+                if ((tag_type == 2) && (record.no_of_tags < start.no_of_tags))
+                {
+                    tag_flag = 0;
+                }
+                else
+                {
+                    for (i = 0; i < start.no_of_tags; i++)
+                    {
+                        for (tag_flag = 0, j = 0; j < record.no_of_tags; j++)
+                            if (strcmpi(start.tags_list[i], record.tags_list[j]) == 0)
+                            {
+                                tag_flag = 1;
+                                break;
+                            }
+
+                        if (tag_type == 1 && tag_flag == 1)
+                        {
+                            tag_pass = 1;
+                            break;
+                        }
+                        else if (tag_type == 2 && tag_flag == 0)
+                        {
+                            tag_pass = 0;
+                            break;
+                        }
+                    }
+                }
+
+                if (tag_pass == 0)
+                    flag = 0;
+                else if (tag_pass == 1)
+                    flag = 1;
+            }
+            if (type == 1 && flag == 1)
+            {
+                pass = 1;
+                break;
+            }
+            else if (type == 2 && flag == 0)
+            {
+                pass = 0;
+                break;
+            }
+
+            //Description
+            flag = 0;
+            if (start.description_size == 0)
+                flag = 1;
+            else
+            {
+                if (record.description_size < start.description_size)
+                    flag = 0;
+                else if (strstr(record.description, start.description) != NULL)
+                    flag = 1;
+            }
+            if (type == 1 && flag == 1)
+            {
+                pass = 1;
+                break;
+            }
+            else if (type == 2 && flag == 0)
+            {
+                pass = 0;
+                break;
+            }
+        }
+
+        if (pass == 1)
+        {
+            total++;
+            list = (long int *)realloc(list, total*sizeof(long int));
+            list[total - 1] = temp_pos;
+        }
+
+        temp_pos = ftell(fp);
+
+        for (i = 0; i < record.no_of_tags; i++)
+            free(record.tags_list[i]);
+        free(record.tags_list);
+        free(record.description);
+    }
+
+    return total;
 }
 
 int tag_compare_ascending(const void *elem1, const void *elem2)
@@ -3357,6 +3608,8 @@ void filter_records()
     short int i;
     short int filter_choice;
     int filter_menu_choice, detail_menu_choice;
+    unsigned int total;
+    long int *pos_list = NULL;
     char temp_id[11] = "";
     char **filter_menu_detial = NULL;
     char **set_detail_menu = NULL;
@@ -3945,6 +4198,28 @@ void filter_records()
 
             system("cls");
             printf("filter_choice = %d\n", filter_choice);
+
+            if (filter_choice == 3)
+                break;
+
+            total = get_filtered_record(start, end, filter_choice, pos_list);
+
+            if (total == -1)
+            {
+                for (i = 0; i < 9; i++)
+                    free(filter_menu_detial[i]);
+                free(filter_menu_detial);
+
+                for (i = 0; i < 6; i++)
+                    free(set_detail_menu[i]);
+                free(set_detail_menu);
+
+                return;
+            }
+
+            for (i = 0; i < total; i++)
+                printf("%ld\n", pos_list[i]);
+
             (void)getkey();
 
             break;
