@@ -1751,7 +1751,7 @@ void display_tags_list(char **tags_list, const unsigned int total_tags)
             printf("Back");
 
             key = getkey();
-            if (key == 13)
+            if (key == ENTER || key == ESC)
                 choice = 3;     //Back
         }
         else if (type == 1)     //Next & Back
