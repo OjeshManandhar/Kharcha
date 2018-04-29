@@ -16,7 +16,7 @@ The files are not ***NOT ENCRYPTED***, so ***passwords*** and other ***text data
 - Filtering records are easy
 
 ### Requisites
-Certian function from [My-CodeBlocks-Static-Library](https://github.com/OjeshManandhar/My-CodeBlocks-Static-Library) are used.
+Certian function from [QBASIC-func-through-C](https://github.com/OjeshManandhar/QBASIC-func-through-C) are used.
 
 So you need to install this static library in **Code::Blocks** or you can just copy-paste those function.
 
@@ -34,7 +34,7 @@ So you need to install this static library in **Code::Blocks** or you can just c
 - Download *main.c*. If you want the tested data download *Users*
 - Create a **Console application** project in **CODE::Blocks** if you want
 - If you created a project replace the *main.c* in that folder by the *main.c* you downloaded
-- Don't forget to install [My-CodeBlocks-Static-Library](https://github.com/OjeshManandhar/My-CodeBlocks-Static-Library) or copy-paste function from there
+- Don't forget to install [QBASIC-func-through-C](https://github.com/OjeshManandhar/QBASIC-func-through-C) or copy-paste function from there
 - Compile *main.c* or the project
 
 ### Further Improvements
