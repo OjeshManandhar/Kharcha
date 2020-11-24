@@ -1,6 +1,20 @@
 # Kharcha
 Program to keep record of money
 
+### Screenshots
+
+![Main Menu](./screenshots/main-menu.png)
+
+![Login](./screenshots/login.png)
+
+![Menu](./screenshots/menu.png)
+
+![Tags List](./screenshots/tags-list.png)
+
+![Filter Menu](./screenshots/filter-menu.png)
+
+![Record List](./screenshots/record-list.png)
+
 ### Development
 I used **Code::Blocks 17.12** as IDE and compiler on Windows 7.
 
